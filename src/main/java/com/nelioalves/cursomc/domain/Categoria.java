@@ -7,15 +7,15 @@ import javax.persistence.Id;
 import java.io.Serializable;
 import java.util.Objects;
 @Entity
-public class Category implements Serializable {
+public class Categoria implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String nome;
 
-    public Category(){}
+    public Categoria(){}
 
-    public Category(Integer id, String nome) {
+    public Categoria(Integer id, String nome) {
         this.id = id;
         this.nome = nome;
     }
@@ -40,8 +40,8 @@ public class Category implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Category category = (Category) o;
-        return Objects.equals(id, category.id);
+        Categoria categoria = (Categoria) o;
+        return Objects.equals(id, categoria.id);
     }
 
     @Override
