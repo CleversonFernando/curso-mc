@@ -1,6 +1,7 @@
 package com.nelioalves.cursomc.services;
 
 import com.nelioalves.cursomc.domain.Categoria;
+import com.nelioalves.cursomc.domain.DTO.CategoriaDTO;
 import com.nelioalves.cursomc.repositories.CategoriaRepository;
 import com.nelioalves.cursomc.services.exception.DataIntegrityException;
 import com.nelioalves.cursomc.services.exception.ObjectNotFoundException;
@@ -19,8 +20,9 @@ public class CategoriaService {
 
     @Autowired
     private CategoriaRepository repo;
+    private Categoria ob;
 
-    public Categoria buscar(Integer id) {
+    public Categoria find(Integer id) {
         Optional<Categoria> obj = repo.findById(id);
         return obj.orElseThrow(() -> new ObjectNotFoundException("Objeto não encontrado! Id: " + id + ", tipo " + Categoria.class.getName()));
     }
@@ -29,7 +31,10 @@ public class CategoriaService {
         obj.setId(null);
         return repo.save(obj);
     }
-
+    public Categoria update(Categoria obj) {
+        find(obj.getId());
+        return repo.save(obj);
+    }
     public void delete(Integer id) {
         try {
             repo.deleteById(id);
@@ -43,5 +48,8 @@ public class CategoriaService {
     public Page<Categoria> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
         return repo.findAll(pageRequest);
+}
+public Categoria fromDTO(CategoriaDTO objDTO){
+        return new Categoria(objDTO.getId(),objDTO.getNome());
 }
 }
