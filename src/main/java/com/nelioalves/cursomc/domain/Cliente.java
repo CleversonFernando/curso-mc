@@ -14,7 +14,7 @@ public class Cliente implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String nome;
-    private String Email;
+    private String email;
     private String CpfOuCnpj;
     private Integer tipo;
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
@@ -31,8 +31,8 @@ public class Cliente implements Serializable {
     public Cliente(Integer id, String nome, String email, String cpfOuCnpj, TipoCliente tipo) {
         this.id = id;
         this.nome = nome;
-        Email = email;
-        CpfOuCnpj = cpfOuCnpj;
+        this.email = email;
+        this.CpfOuCnpj = cpfOuCnpj;
         this.tipo = (tipo==null) ? null : tipo.getCod();
     }
 
@@ -53,11 +53,11 @@ public class Cliente implements Serializable {
     }
 
     public String getEmail() {
-        return Email;
+        return email;
     }
 
     public void setEmail(String email) {
-        Email = email;
+        email = email;
     }
 
     public String getCpfOuCnpj() {
