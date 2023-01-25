@@ -1,7 +1,6 @@
 package com.nelioalves.cursomc.config;
 
-import com.nelioalves.cursomc.security.JWTAuthenticationFilter;
-import com.nelioalves.cursomc.security.JWTUtil;
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +17,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
+import com.nelioalves.cursomc.security.JWTAuthenticationFilter;
+import com.nelioalves.cursomc.security.JWTAuthorizationFilter;
+import com.nelioalves.cursomc.security.JWTUtil;
 
 @Configuration
 @EnableWebSecurity
@@ -28,8 +29,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private Environment env;
+
     @Autowired
     private JWTUtil jwtUtil;
+
     private static final String[] PUBLIC_MATCHERS = {
             "/h2-console/**"
     };
@@ -46,13 +49,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         }
 
         http.cors().and().csrf().disable();
-        http.authorizeRequests().
-                antMatchers(HttpMethod.GET, PUBLIC_MATCHERS_GET).permitAll().
-                antMatchers(PUBLIC_MATCHERS).
-                permitAll().
-                anyRequest().
-                authenticated();
+        http.authorizeRequests()
+                .antMatchers(HttpMethod.GET, PUBLIC_MATCHERS_GET).permitAll()
+                .antMatchers(PUBLIC_MATCHERS).permitAll()
+                .anyRequest().authenticated();
         http.addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtUtil));
+        http.addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtUtil, userDetailsService));
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
