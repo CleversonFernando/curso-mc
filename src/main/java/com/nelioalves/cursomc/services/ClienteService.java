@@ -1,5 +1,6 @@
 package com.nelioalves.cursomc.services;
 
+import com.amazonaws.services.sns.model.AuthorizationErrorException;
 import com.nelioalves.cursomc.domain.Categoria;
 import com.nelioalves.cursomc.domain.Cidade;
 import com.nelioalves.cursomc.domain.Cliente;
@@ -10,6 +11,7 @@ import com.nelioalves.cursomc.domain.enums.TipoCliente;
 import com.nelioalves.cursomc.repositories.CidadeRepository;
 import com.nelioalves.cursomc.repositories.ClienteRepository;
 import com.nelioalves.cursomc.repositories.EnderecoRepository;
+import com.nelioalves.cursomc.security.UserSS;
 import com.nelioalves.cursomc.services.exception.DataIntegrityException;
 import com.nelioalves.cursomc.services.exception.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +93,17 @@ public class ClienteService {
         newObj.setEmail(obj.getEmail());
     }
     public URI uploadProfilePicture(MultipartFile multipartFile){
-        return s3Service.uploadFile(multipartFile);
+        UserSS user = UserService.authenticated();
+        if (user == null){
+            throw new AuthorizationErrorException("Acesso negado");
+        }
+        URI uri = s3Service.uploadFile(multipartFile);
+
+        Cliente cli = find(user.getId());
+        cli.setImageUrl(uri.toString());
+        repo.save(cli);
+
+        return uri;
     }
 }
 
