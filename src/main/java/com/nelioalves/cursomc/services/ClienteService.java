@@ -1,17 +1,16 @@
 package com.nelioalves.cursomc.services;
 
-import com.amazonaws.services.sns.model.AuthorizationErrorException;
-import com.nelioalves.cursomc.domain.Categoria;
 import com.nelioalves.cursomc.domain.Cidade;
 import com.nelioalves.cursomc.domain.Cliente;
 import com.nelioalves.cursomc.domain.DTO.ClienteDTO;
 import com.nelioalves.cursomc.domain.DTO.ClienteNewDTO;
 import com.nelioalves.cursomc.domain.Endereco;
+import com.nelioalves.cursomc.domain.enums.Perfil;
 import com.nelioalves.cursomc.domain.enums.TipoCliente;
-import com.nelioalves.cursomc.repositories.CidadeRepository;
 import com.nelioalves.cursomc.repositories.ClienteRepository;
 import com.nelioalves.cursomc.repositories.EnderecoRepository;
 import com.nelioalves.cursomc.security.UserSS;
+import com.nelioalves.cursomc.services.exception.AuthorizationException;
 import com.nelioalves.cursomc.services.exception.DataIntegrityException;
 import com.nelioalves.cursomc.services.exception.ObjectNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +78,19 @@ public class ClienteService {
     public List<Cliente> findAll() {
         return repo.findAll();
     }
+
+    public Cliente findByEmail(String email){
+        UserSS user = UserService.authenticated();
+        if (user == null || !user.hasRole(Perfil.ADMIN) && !email.equals(user.getUsername())){
+            throw new AuthorizationException( "acesso negado");
+        }
+        Cliente obj = repo.findByEmail(email);
+        if (obj == null){
+            throw new ObjectNotFoundException("Objeto não encontrado! Id: " + user.getId() + "Tipo: " + Cliente.class.getName());
+        }
+        return obj;
+    }
+
     public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
         PageRequest pageRequest = PageRequest.of(page, linesPerPage, Sort.Direction.valueOf(direction), orderBy);
         return repo.findAll(pageRequest);
@@ -106,7 +118,7 @@ public class ClienteService {
     public URI uploadProfilePicture(MultipartFile multipartFile){
         UserSS user = UserService.authenticated();
         if (user == null){
-            throw new AuthorizationErrorException("Acesso negado");
+            throw new AuthorizationException("Acesso negado");
         }
         BufferedImage jpgImage = imageService.getJpgImageFromFile(multipartFile);
         jpgImage = imageService.cropSquare(jpgImage);
